@@ -12,6 +12,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.use(require('./routes/usuario'));
+app.use(require('./routes/linea'));
+app.use(require('./routes/producto'));
+app.use(require('./routes/factura'));
+// app.use(require('./routes/linea'));
 
 app.get('/', function (req, res) {
   res.json('Hello World')

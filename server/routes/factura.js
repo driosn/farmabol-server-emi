@@ -1,23 +1,21 @@
 const express = require('express')
-const bcrypt = require('bcrypt');
-const _ = require('underscore');
 
-const Usuario = require('../models/usuario');
+const Factura = require('../models/factura');
 
 const app = express();
 
-// GET - Usuarios
-app.get('/usuario', function (req, res) {
+// GET - facturas
+app.get('/factura', function (req, res) {
     let desde = req.query.desde ||  0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Usuario.find({}, 'nombre email')
+    Factura.find({estado: true})
             // .skip(desde)
             // .limit(limite)
-            .exec((err, usuarios) => {
+            .exec((err, facturas) => {
                 if (err) {
                     return res.status(400).json({
                         ok: false,
@@ -25,30 +23,31 @@ app.get('/usuario', function (req, res) {
                     });
                 }
                 
-                Usuario.count((err, conteo) => {
+                Factura.count({estado: true}, (err, conteo) => {
                     res.json({
                       ok: true,
-                      usuarios,
+                      facturas,
                       cantidad: conteo
                     })
                 })
             })
 });
 
-// post - Usuarios
-app.post('/usuario', function (req, res) {
+// 
+// Endpoint - Crear Factura
+//
+app.post('/factura', function (req, res) {
     let body = req.body;
 
-    let usuario = new Usuario({
-        "nombre": body.nombre,
-        "email": body.email,
-        "password": bcrypt.hashSync(body.password, 10),
-        "role": body.role,
-        "ci": Number(body.ci),
-        "extension_ci": body.extension_ci
+    let factura = new Factura({
+        "nombre_usr": body.nombre_usr,
+        "nit": body.nit,
+        "fecha_fac": Number(body.fecha_fac),
+        "total": Number(body.total),
+        "detalle": body.detalle
     });
 
-    usuario.save((err, usuarioDB) => {
+    factura.save((err, facturaDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -56,21 +55,21 @@ app.post('/usuario', function (req, res) {
             });
         } 
 
-        // usuarioDB.password = null;
         res.json({
             ok: true,
-            usuario: usuarioDB
+            factura: facturaDB
         })
     });
-
 });
 
-// put - Usuarios
-app.put('/usuario/:id', function (req, res) {
+//
+// Endpoint - Editar Factura
+//
+app.put('/factura/:id', function (req, res) {
     let id = req.params.id;
-    let body = _.pick(req.body, ['nombre', 'email']);
+    let body = req.body
 
-    Usuario.findByIdAndUpdate(id, body, {new: true}, (err, usuarioDB) => {
+    Factura.findByIdAndUpdate(id, body, {new: true, runValidators:true}, (err, facturaDb) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -80,16 +79,22 @@ app.put('/usuario/:id', function (req, res) {
 
         res.json({
             ok: true,
-            usuario: usuarioDB
+            factura: facturaDB
         });
     })
 });
 
-// delete - Usuarios (Borrar totalmente)
-app.delete('/usuario/:id', function (req, res) {
+//
+// Endpoint - Borrar Factura (Cambiar Estado)
+//
+app.delete('/factura/:id', function (req, res) {
     let id = req.params.id;
 
-    Usuario.findByIdAndDelete(id, (err, usuarioBorrado) => {
+    let cambiaEstado = {
+        estado: false
+    }
+
+    Factura.findByIdAndUpdate(id, cambiaEstado, {new: true}, (err, facturaBorrada) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -97,18 +102,18 @@ app.delete('/usuario/:id', function (req, res) {
             });
         }
 
-        if (usuarioBorrado === null) {
+        if (facturaBorrada === null) {
             return res.status(400).json({
                 ok: false,
                 err: {
-                    message: 'Usuario no encontrado'
+                    message: 'Factura no encontrada'
                 }
             }); 
         }
 
         res.json({
             ok: true,
-            message: "Usuario borrado correctamente"
+            factura: facturaBorrada
         });
     })
 

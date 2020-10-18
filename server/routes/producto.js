@@ -1,23 +1,23 @@
-const express = require('express')
-const bcrypt = require('bcrypt');
-const _ = require('underscore');
+const express = require('express');
 
-const Usuario = require('../models/usuario');
+const Producto = require('../models/producto');
 
 const app = express();
 
-// GET - Usuarios
-app.get('/usuario', function (req, res) {
+// 
+// Endpoint - Obtener Productos
+//
+app.get('/producto', function (req, res) {
     let desde = req.query.desde ||  0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Usuario.find({}, 'nombre email')
+    Producto.find()
             // .skip(desde)
             // .limit(limite)
-            .exec((err, usuarios) => {
+            .exec((err, productos) => {
                 if (err) {
                     return res.status(400).json({
                         ok: false,
@@ -25,30 +25,31 @@ app.get('/usuario', function (req, res) {
                     });
                 }
                 
-                Usuario.count((err, conteo) => {
+                Producto.count((err, conteo) => {
                     res.json({
                       ok: true,
-                      usuarios,
+                      productos,
                       cantidad: conteo
                     })
                 })
             })
 });
 
-// post - Usuarios
-app.post('/usuario', function (req, res) {
+// 
+// Endpoint - Insertar producto
+//
+app.post('/producto', function (req, res) {
     let body = req.body;
 
-    let usuario = new Usuario({
+    let produto = new Producto({
+        "codigo": body.codigo,
+        "familia": body.familia,
+        "linea": body.linea,
         "nombre": body.nombre,
-        "email": body.email,
-        "password": bcrypt.hashSync(body.password, 10),
-        "role": body.role,
-        "ci": Number(body.ci),
-        "extension_ci": body.extension_ci
+        "precio": Number(body.precio)
     });
 
-    usuario.save((err, usuarioDB) => {
+    producto.save((err, productoDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -56,21 +57,21 @@ app.post('/usuario', function (req, res) {
             });
         } 
 
-        // usuarioDB.password = null;
         res.json({
             ok: true,
-            usuario: usuarioDB
+            producto: productoDB
         })
     });
-
 });
 
-// put - Usuarios
-app.put('/usuario/:id', function (req, res) {
+//
+// Endpoint - Editar Producto
+//
+app.put('/producto/:id', function (req, res) {
     let id = req.params.id;
-    let body = _.pick(req.body, ['nombre', 'email']);
+    let body = req.body
 
-    Usuario.findByIdAndUpdate(id, body, {new: true}, (err, usuarioDB) => {
+    Producto.findByIdAndUpdate(id, body, {new: true, runValidators:true}, (err, productoDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -80,16 +81,18 @@ app.put('/usuario/:id', function (req, res) {
 
         res.json({
             ok: true,
-            usuario: usuarioDB
+            producto: productoDB
         });
     })
 });
 
-// delete - Usuarios (Borrar totalmente)
-app.delete('/usuario/:id', function (req, res) {
+//
+// Endpoint - Borrar Producto (Borrar Producto totalmente)
+//
+app.delete('/factura/:id', function (req, res) {
     let id = req.params.id;
 
-    Usuario.findByIdAndDelete(id, (err, usuarioBorrado) => {
+    Producto.findByIdAndDelete(id, (err, productoBorrado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -97,18 +100,18 @@ app.delete('/usuario/:id', function (req, res) {
             });
         }
 
-        if (usuarioBorrado === null) {
+        if (productoBorrado === null) {
             return res.status(400).json({
                 ok: false,
                 err: {
-                    message: 'Usuario no encontrado'
+                    message: 'Producto no encontrado'
                 }
             }); 
         }
 
         res.json({
             ok: true,
-            message: "Usuario borrado correctamente"
+            message: 'Producto borrado correctamente'
         });
     })
 

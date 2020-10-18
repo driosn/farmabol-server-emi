@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
-let rolesValidos = {
-    values: ['ADMIN_ROLE', 'USER_ROLE'],
-    message: '{VALUE} no es un rol válido'
+let extensionesValidas = {
+    values: ['LP', 'SC', 'OR', 'PT', 'CB', 'BN', 'PA', 'TJ', 'CH'],
+    message: '{VALUE} no es una extensión válida'
 }
 
 let Schema = mongoose.Schema;
@@ -22,19 +22,17 @@ let usuarioSchema = new Schema({
         type: String,
         required: [true, 'La contraseña es obligatoria']
     },
-    role: { // default: 'USER_ROLE'
+    ci: {
+        type: Number,
+        required: [true, 'El CI es obligatorio'],
+    },
+    extension_ci: {
         type: String,
-        default: 'USER_ROLE',
-        enum: rolesValidos
+        required: [true, 'La extension del CI es obligatoria'],
+        enum: extensionesValidas
     },
-    estado: {
-        type: Boolean,
-        default: true
-    },
-    google: {
-        type: Boolean,
-        default: false
-    },
+}, {
+    versionKey: false
 });
 
 usuarioSchema.methods.toJSON = function() {
