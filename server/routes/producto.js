@@ -1,4 +1,5 @@
 const express = require('express');
+const producto = require('../models/producto');
 
 const Producto = require('../models/producto');
 
@@ -41,7 +42,7 @@ app.get('/producto', function (req, res) {
 app.post('/producto', function (req, res) {
     let body = req.body;
 
-    let produto = new Producto({
+    let producto = new Producto({
         "codigo": body.codigo,
         "familia": body.familia,
         "linea": body.linea,
@@ -71,12 +72,21 @@ app.put('/producto/:id', function (req, res) {
     let id = req.params.id;
     let body = req.body
 
-    Producto.findByIdAndUpdate(id, body, {new: true, runValidators:true}, (err, productoDB) => {
+    Producto.findByIdAndUpdate(id, body, {new: true}, (err, productoDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
                 err
             });
+        }
+
+        if (productoDB === null) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Producto no encontrado'
+                }
+            })
         }
 
         res.json({
@@ -89,7 +99,7 @@ app.put('/producto/:id', function (req, res) {
 //
 // Endpoint - Borrar Producto (Borrar Producto totalmente)
 //
-app.delete('/factura/:id', function (req, res) {
+app.delete('/producto/:id', function (req, res) {
     let id = req.params.id;
 
     Producto.findByIdAndDelete(id, (err, productoBorrado) => {
@@ -113,8 +123,7 @@ app.delete('/factura/:id', function (req, res) {
             ok: true,
             message: 'Producto borrado correctamente'
         });
-    })
-
+    });
 });
 
 

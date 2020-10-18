@@ -68,7 +68,7 @@ app.put('/linea/:id', function (req, res) {
             })
         }
 
-        if (lineaBorrada === null) {
+        if (lineaDB === null) {
             return res.status(400).json({
                 ok: false,
                 err: {
