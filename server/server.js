@@ -15,7 +15,7 @@ app.use(require('./routes/usuario'));
 app.use(require('./routes/linea'));
 app.use(require('./routes/producto'));
 app.use(require('./routes/factura'));
-// app.use(require('./routes/linea'));
+app.use(require('./routes/pedido'));
 
 app.get('/', function (req, res) {
   res.json('Hello World')

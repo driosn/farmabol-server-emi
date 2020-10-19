@@ -4,27 +4,25 @@ const uniqueValidator = require('mongoose-unique-validator');
 let Schema = mongoose.Schema;
 
 let pedidoSchema = new Schema({
-    nombre_prod: {
-        type: String
-    },
-    cantidad: {
-        type: Number,
-    },
-    codigo_prod: {
-        type: Number
-    },
     nombre_usr: {
         type: String,
     },
-    codigo_usr: {
-        type: Number
+    id_usr: {
+        type: String,
+        required: true
     },
     fecha_pedido: {
         type: String
     },
+    nit: {
+        type: Number
+    },
     detalle: {
         type: [Map],
         required: [true, 'No se puede realizar un pedido sin productos']
+    },
+    total: {
+        type: Number
     }
 }, {
     versionKey: false

@@ -1,21 +1,23 @@
 const express = require('express')
 
-const Factura = require('../models/factura');
+const Pedido = require('../models/pedido');
 
 const app = express();
 
-// GET - facturas
-app.get('/factura', function (req, res) {
+//
+// Endpoint - Obtener Pedidos
+//
+app.get('/pedido', function (req, res) {
     let desde = req.query.desde ||  0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Factura.find({estado: true})
+    Pedido.find()
             // .skip(desde)
             // .limit(limite)
-            .exec((err, facturas) => {
+            .exec((err, pedidos) => {
                 if (err) {
                     return res.status(400).json({
                         ok: false,
@@ -23,10 +25,10 @@ app.get('/factura', function (req, res) {
                     });
                 }
                 
-                Factura.count({estado: true}, (err, conteo) => {
+                Pedido.count({}, (err, conteo) => {
                     res.json({
                       ok: true,
-                      facturas,
+                      pedidos,
                       cantidad: conteo
                     })
                 })
@@ -34,20 +36,21 @@ app.get('/factura', function (req, res) {
 });
 
 //
-// Endpoint - Crear Factura
+// Endpoint - Crear Pedido
 //
-app.post('/factura', function (req, res) {
+app.post('/pedido', function (req, res) {
     let body = req.body;
 
-    let factura = new Factura({
+    let pedido = new Pedido({
         "nombre_usr": body.nombre_usr,
+        "id_usr": body.id_usr,
+        "fecha_pedido": body.fecha_pedido,
         "nit": body.nit,
-        "fecha_fac": Number(body.fecha_fac),
-        "total": Number(body.total),
-        "detalle": body.detalle
+        "detalle": body.detalle,
+        "total": body.total
     });
 
-    factura.save((err, facturaDB) => {
+    pedido.save((err, pedidoDB) =>  {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -57,19 +60,19 @@ app.post('/factura', function (req, res) {
 
         res.json({
             ok: true,
-            factura: facturaDB
+            pedido: pedidoDB
         })
     });
 });
 
 //
-// Endpoint - Editar Factura
+// Endpoint - Editar Pedido
 //
-app.put('/factura/:id', function (req, res) {
+app.put('/pedido/:id', function (req, res) {
     let id = req.params.id;
     let body = req.body
 
-    Factura.findByIdAndUpdate(id, body, {new: true}, (err, facturaDB) => {
+    Pedido.findByIdAndUpdate(id, body, {new: true}, (err, pedidoDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -77,31 +80,29 @@ app.put('/factura/:id', function (req, res) {
             });
         }
 
-        if (facturaDB === null) {
+        if (pedidoDB === null) {
             return res.status(400).json({
                 ok: false,
-                err
+                err: {
+                    message: 'Pedido no encontrado'
+                }
             });
         }
 
         res.json({
             ok: true,
-            factura: facturaDB
+            pedido: pedidoDB
         });
     })
 });
 
 //
-// Endpoint - Borrar Factura (Cambiar Estado)
+// Endpoint - Borrar Pedido (Borrado DB)
 //
-app.delete('/factura/:id', function (req, res) {
+app.delete('/pedido/:id', function (req, res) {
     let id = req.params.id;
 
-    let cambiaEstado = {
-        estado: false
-    }
-
-    Factura.findByIdAndUpdate(id, cambiaEstado, {new: true}, (err, facturaBorrada) => {
+    Pedido.findByIdAndDelete(id, (err, pedidoBorrado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -109,18 +110,18 @@ app.delete('/factura/:id', function (req, res) {
             });
         }
 
-        if (facturaBorrada === null) {
+        if (pedidoBorrado === null) {
             return res.status(400).json({
                 ok: false,
                 err: {
-                    message: 'Factura no encontrada'
+                    message: 'Pedido no encontrado'
                 }
             }); 
         }
 
         res.json({
             ok: true,
-            factura: facturaBorrada
+            pedido: pedidoBorrado
         });
     })
 });
