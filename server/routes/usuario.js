@@ -6,6 +6,44 @@ const Usuario = require('../models/usuario');
 
 const app = express();
 
+// Post - Login
+app.post('/login', (req, res) => {
+    let body = req.body;
+
+    Usuario.findOne({email: body.email}, (err, usuarioDB) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                err
+            });
+        }
+
+        if (!usuarioDB) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario o contraseña incorrectos'
+                }
+            }); 
+        }
+
+        if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario o contraseña incorrectos'
+                }
+            }); 
+        }
+
+        return res.json({
+            ok: true,
+            usuario: usuarioDB
+        });
+
+    });
+}); 
+
 // GET - Usuarios
 app.get('/usuario', function (req, res) {
     let desde = req.query.desde ||  0;
